@@ -1,10 +1,21 @@
 package models
 
 type User struct {
-	Id        int    `gorm:"primaryKey" json:"id"`
-	FirstName string `gorm:"varchar(50)" json:"firstName"`
-	LastName  string `gorm:"varchar(50)" json:"lastName"`
-	Email     string `gorm:"varchar(100)" json:"email"`
-	Password  string `gorm:"varchar(100)" json:"password"`
-	Profile   string `gorm:"varchar(100)" json:"profile"`
+	Id       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Profile  string `json:"profile"`
+}
+
+type UserRegister struct {
+	Username        string `json:"username" validate:"required,max=20"`
+	Email           string `json:"email" validate:"required,max=50"`
+	Password        string `json:"password" validate:"required,max=50"`
+	ConfirmPassword string `json:"confirmPassword" validate:"required,max=50"`
+}
+
+type UserLogin struct {
+	Username string `json:"username" validate:"required,max=20"`
+	Password string `json:"password" validate:"required,max=50"`
 }

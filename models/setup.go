@@ -1,19 +1,23 @@
 package models
 
 import (
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
+	"database/sql"
+	"log"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
-var DB *gorm.DB
+var DB *sql.DB
 
 func ConnectDatabase() {
-	database, err := gorm.Open(mysql.Open("root:@tcp(localhost:3306)/gesture_guru"))
+	var err error
+	dsn := "root:@tcp(localhost:3306)/gesture_guru"
+	DB, err = sql.Open("mysql", dsn)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	database.AutoMigrate(&User{})
-
-	DB = database
+	if err := DB.Ping(); err != nil {
+		log.Fatal(err)
+	}
 }
