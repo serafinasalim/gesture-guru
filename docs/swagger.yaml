@@ -1,0 +1,282 @@
+basePath: /gesture-guru
+definitions:
+  models.Lesson:
+    properties:
+      code:
+        type: string
+      duration:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      type:
+        type: string
+      video:
+        type: string
+    type: object
+  models.User:
+    properties:
+      bio:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+      profile:
+        type: string
+      username:
+        type: string
+    type: object
+  models.UserLogin:
+    properties:
+      password:
+        maxLength: 50
+        type: string
+      username:
+        maxLength: 20
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.UserRegister:
+    properties:
+      confirmPassword:
+        maxLength: 50
+        type: string
+      email:
+        maxLength: 50
+        type: string
+      password:
+        maxLength: 50
+        type: string
+      username:
+        maxLength: 20
+        type: string
+    required:
+    - confirmPassword
+    - email
+    - password
+    - username
+    type: object
+  models.UserUpdate:
+    properties:
+      bio:
+        type: string
+      profile:
+        type: string
+      username:
+        maxLength: 20
+        type: string
+    type: object
+  models.UserUpdateEmail:
+    properties:
+      email:
+        maxLength: 50
+        type: string
+    required:
+    - email
+    type: object
+  models.UserVerify:
+    properties:
+      otp:
+        maxLength: 6
+        minLength: 6
+        type: string
+    required:
+    - otp
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Documentation for  GestureGuru
+  title: Gesture Guru API
+  version: "1.0"
+paths:
+  /lessons/{userId}:
+    get:
+      parameters:
+      - description: userId
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Lesson'
+      summary: Browse Lesson
+      tags:
+      - Lessons
+  /lessons/save/{id}:
+    put:
+      parameters:
+      - description: lessonId
+        in: path
+        name: lessonId
+        required: true
+        type: integer
+      - description: userId
+        in: query
+        name: userId
+        required: true
+        type: integer
+      responses: {}
+      summary: Save Lesson
+      tags:
+      - Users
+  /user/{id}:
+    get:
+      parameters:
+      - description: userId
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Detail User
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: 'Sample Payload: <br> `{`<br>` "profile": "profile.jpg", `<br>`
+        "username": "serafinasalim", `<br>` "bio": "bio aq" `<br>` }`'
+      parameters:
+      - description: userId
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User Update
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserUpdate'
+      produces:
+      - application/json
+      responses: {}
+      summary: Update User
+      tags:
+      - Users
+  /user/email/{id}:
+    put:
+      consumes:
+      - application/json
+      description: 'Sample Payload: <br> `{`<br>` "email": "serafina@gmail.com" `<br>`
+        }`'
+      parameters:
+      - description: userId
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User Update Email
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserUpdateEmail'
+      produces:
+      - application/json
+      responses: {}
+      summary: Update User Email
+      tags:
+      - Users
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: 'Sample Payload: <br> `{`<br>`"username": "serafina", `<br>` "password":
+        "123456" `<br>` }`'
+      parameters:
+      - description: User Login
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLogin'
+      produces:
+      - application/json
+      responses: {}
+      summary: Login User
+      tags:
+      - Users
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: 'Sample Payload: <br> `{`<br>`"username": "serafina", `<br>` "email":
+        "serafina@gmail.com", `<br>` "password": "123456", `<br>` "confirmPassword":
+        "123456" `<br>`}`'
+      parameters:
+      - description: User Registration
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserRegister'
+      produces:
+      - application/json
+      responses: {}
+      summary: Register User
+      tags:
+      - Users
+  /user/request-otp/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: userId
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Request OTP
+      tags:
+      - Users
+  /user/verify/{id}:
+    put:
+      consumes:
+      - application/json
+      description: 'Sample Payload: <br> `{`<br>`"otp": "ABCDEF" `<br>`}`'
+      parameters:
+      - description: userId
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: "true"
+        description: new
+        enum:
+        - "true"
+        - "false"
+        in: query
+        name: new
+        required: true
+        type: string
+      - description: User Verification
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserVerify'
+      produces:
+      - application/json
+      responses: {}
+      summary: Verify User
+      tags:
+      - Users
+swagger: "2.0"
