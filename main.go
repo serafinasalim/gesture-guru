@@ -1,25 +1,37 @@
 package main
 
 import (
+	"time"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	lessonController "github.com/serafinasalim/gesture-guru/controllers/lessonController"
 	userController "github.com/serafinasalim/gesture-guru/controllers/userController"
 	"github.com/serafinasalim/gesture-guru/models"
-
-	_ "github.com/serafinasalim/gesture-guru/docs"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // @title Gesture Guru API
 // @version 1.0
-// @description Documentation for  GestureGuru
+// @description Documentation for GestureGuru
 
 // @host localhost:8080
 // @BasePath /gesture-guru
 
 func main() {
 	route := gin.Default()
+
+	// Middleware CORS
+	route.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true, // Ubah sesuai kebutuhan
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	models.ConnectDatabase()
 
 	// Swagger setup
@@ -37,7 +49,8 @@ func main() {
 		api.PUT("/user/email/:id", userController.UpdateEmail)
 
 		// Lesson API
-		api.GET("/lessons", lessonController.Browse)
+		api.GET("/lessons/:userId", lessonController.Browse)
+		api.PUT("/lesson/save/:userId/:lessonId", lessonController.SaveLesson)
 	}
 
 	route.Run()

@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Documentation for  GestureGuru",
+        "description": "Documentation for GestureGuru",
         "title": "Gesture Guru API",
         "contact": {},
         "version": "1.0"
@@ -9,10 +9,10 @@
     "host": "localhost:8080",
     "basePath": "/gesture-guru",
     "paths": {
-        "/lessons/save/{id}": {
+        "/lesson/save/{userId}/{lessonId}": {
             "put": {
                 "tags": [
-                    "Users"
+                    "Lessons"
                 ],
                 "summary": "Save Lesson",
                 "parameters": [
@@ -27,7 +27,7 @@
                         "type": "integer",
                         "description": "userId",
                         "name": "userId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -44,7 +44,7 @@
                     {
                         "type": "integer",
                         "description": "userId",
-                        "name": "id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     }
@@ -287,6 +287,12 @@
                 },
                 "id": {
                     "type": "integer"
+                },
+                "saved": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"

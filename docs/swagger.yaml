@@ -8,6 +8,10 @@ definitions:
         type: string
       id:
         type: integer
+      saved:
+        type: boolean
+      status:
+        type: string
       title:
         type: string
       type:
@@ -92,16 +96,33 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: Documentation for  GestureGuru
+  description: Documentation for GestureGuru
   title: Gesture Guru API
   version: "1.0"
 paths:
+  /lesson/save/{userId}/{lessonId}:
+    put:
+      parameters:
+      - description: lessonId
+        in: path
+        name: lessonId
+        required: true
+        type: integer
+      - description: userId
+        in: path
+        name: userId
+        required: true
+        type: integer
+      responses: {}
+      summary: Save Lesson
+      tags:
+      - Lessons
   /lessons/{userId}:
     get:
       parameters:
       - description: userId
         in: path
-        name: id
+        name: userId
         required: true
         type: integer
       responses:
@@ -112,23 +133,6 @@ paths:
       summary: Browse Lesson
       tags:
       - Lessons
-  /lessons/save/{id}:
-    put:
-      parameters:
-      - description: lessonId
-        in: path
-        name: lessonId
-        required: true
-        type: integer
-      - description: userId
-        in: query
-        name: userId
-        required: true
-        type: integer
-      responses: {}
-      summary: Save Lesson
-      tags:
-      - Users
   /user/{id}:
     get:
       parameters:

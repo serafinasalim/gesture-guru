@@ -7,4 +7,6 @@ type Lesson struct {
 	Type     string `json:"type"`
 	Video    string `json:"video"`
 	Duration string `json:"duration"`
+	Saved    bool   `json:"saved"`
+	Status   string `json:"status"`
 }

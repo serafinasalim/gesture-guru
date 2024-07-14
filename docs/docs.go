@@ -15,10 +15,10 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/lessons/save/{id}": {
+        "/lesson/save/{userId}/{lessonId}": {
             "put": {
                 "tags": [
-                    "Users"
+                    "Lessons"
                 ],
                 "summary": "Save Lesson",
                 "parameters": [
@@ -33,7 +33,7 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "userId",
                         "name": "userId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -50,7 +50,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "userId",
-                        "name": "id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     }
@@ -294,6 +294,12 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "saved": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -422,7 +428,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/gesture-guru",
 	Schemes:          []string{},
 	Title:            "Gesture Guru API",
-	Description:      "Documentation for  GestureGuru",
+	Description:      "Documentation for GestureGuru",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

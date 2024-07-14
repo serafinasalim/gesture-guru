@@ -18,7 +18,7 @@ func init() {
 
 // @Summary Browse Lesson
 // @Tags Lessons
-// @Param id path int true "userId"
+// @Param userId path int true "userId"
 // @Success 200 {object} models.Lesson
 // @Router /lessons/{userId} [get]
 func Browse(c *gin.Context) {
@@ -26,15 +26,17 @@ func Browse(c *gin.Context) {
 
 	var lessonData models.Lesson
 	const queryBrowse = `SELECT 
-					A.id,
-					A.code, 
-					A.title, 
-					A.type, 
-					A.video,
-					A.duration 
-				FROM lessons A
-				JOIN lesson_status B ON A.id = B.lesson_id
-				WHERE B.user_id = ?`
+							A.id,
+							A.code, 
+							A.title, 
+							A.type, 
+							A.video,
+							A.duration,
+							B.saved,
+							B.status
+						FROM lessons A
+						JOIN lesson_status B ON A.id = B.lesson_id
+						WHERE B.user_id = ?`
 	rows, err := models.DB.Query(queryBrowse, userId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
@@ -51,6 +53,8 @@ func Browse(c *gin.Context) {
 			&lessonData.Type,
 			&lessonData.Video,
 			&lessonData.Duration,
+			&lessonData.Saved,
+			&lessonData.Status,
 		); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
 			return
@@ -72,15 +76,15 @@ func Browse(c *gin.Context) {
 }
 
 // @Summary Save Lesson
-// @Tags Users
+// @Tags Lessons
 // @Param lessonId path int true "lessonId"
-// @Param userId query int true "userId"
-// @Router /lessons/save/{id} [put]
+// @Param userId path int true "userId"
+// @Router /lesson/save/{userId}/{lessonId} [put]
 func SaveLesson(c *gin.Context) {
 	lessonId := c.Param("lessonId")
-	userId := c.Query("userId")
+	userId := c.Param("userId")
 
-	querySaveLesson := "UDPATE lesson_status SET saved = 1 WHERE user_id = ? AND lesson_id = ?"
+	querySaveLesson := "UPDATE lesson_status SET saved = 1 WHERE user_id = ? AND lesson_id = ?"
 	_, err := models.DB.Exec(querySaveLesson, userId, lessonId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})

@@ -114,13 +114,6 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// Generate OTP
-	otp, err := GenerateOTPToken()
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to generate OTP"})
-		return
-	}
-
 	// Check if the email already exists
 	var exists bool
 	query := "SELECT EXISTS(SELECT 1 FROM users WHERE email = ?)"
@@ -131,6 +124,25 @@ func Register(c *gin.Context) {
 
 	if exists {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Email already registered"})
+		return
+	}
+
+	var unique bool
+	queryUnique := "SELECT EXISTS(SELECT 1 FROM users WHERE username = ?)"
+	if err := models.DB.QueryRow(queryUnique, params.Username).Scan(&unique); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
+
+	if unique {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Username already exists"})
+		return
+	}
+
+	// Generate OTP
+	otp, err := GenerateOTPToken()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to generate OTP"})
 		return
 	}
 
@@ -174,6 +186,18 @@ func Verify(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
+
+	var verified bool
+	queryVerified := "SELECT verified FROM users WHERE id = ?"
+	if err := models.DB.QueryRow(queryVerified, id).Scan(&verified); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
+
+	if verified {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "User already verified"})
 		return
 	}
 
@@ -303,8 +327,9 @@ func Login(c *gin.Context) {
 
 	// Check if the email already exists
 	var storedPassword string
-	query := "SELECT password FROM users WHERE username = ?"
-	if err := models.DB.QueryRow(query, user.Username).Scan(&storedPassword); err != nil {
+	var verified bool
+	query := "SELECT password, verified FROM users WHERE username = ?"
+	if err := models.DB.QueryRow(query, user.Username).Scan(&storedPassword, &verified); err != nil {
 		if err == sql.ErrNoRows {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "error", "message": "Invalid username or password"})
 		} else {
@@ -316,6 +341,11 @@ func Login(c *gin.Context) {
 	// Compare the stored password with the provided password
 	if storedPassword != user.Password {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "error", "message": "Invalid username or password"})
+		return
+	}
+
+	if !verified {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "User is not verified"})
 		return
 	}
 
@@ -471,6 +501,11 @@ func RequestOTP(c *gin.Context) {
 	queryEmail := "SELECT email, verified FROM users WHERE id = ?"
 	if err := models.DB.QueryRow(queryEmail, userId).Scan(&email, &verified); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
+
+	if verified {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "User already verified"})
 		return
 	}
 
