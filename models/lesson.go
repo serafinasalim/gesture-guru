@@ -10,3 +10,13 @@ type Lesson struct {
 	Saved    bool   `json:"saved"`
 	Status   string `json:"status"`
 }
+
+type LessonBrowse struct {
+	UserId   int `json:"userId" validate:"required"`
+	LessonId int `json:"lessonId"`
+}
+
+type LessonAttempt struct {
+	AttemptNumber int     `json:"attemptNumber"`
+	Score         float64 `json:"score" validate:"required,min=1,max=100"`
+}

@@ -19,6 +19,26 @@ definitions:
       video:
         type: string
     type: object
+  models.LessonAttempt:
+    properties:
+      attemptNumber:
+        type: integer
+      score:
+        maximum: 100
+        minimum: 1
+        type: number
+    required:
+    - score
+    type: object
+  models.LessonBrowse:
+    properties:
+      lessonId:
+        type: integer
+      userId:
+        type: integer
+    required:
+    - userId
+    type: object
   models.User:
     properties:
       bio:
@@ -33,6 +53,15 @@ definitions:
         type: string
       username:
         type: string
+      verified:
+        type: boolean
+    type: object
+  models.UserDetail:
+    properties:
+      userId:
+        type: integer
+    required:
+    - userId
     type: object
   models.UserLogin:
     properties:
@@ -100,6 +129,42 @@ info:
   title: Gesture Guru API
   version: "1.0"
 paths:
+  /lesson:
+    post:
+      parameters:
+      - description: LessonBrowse
+        in: body
+        name: lesson
+        required: true
+        schema:
+          $ref: '#/definitions/models.LessonBrowse'
+      responses: {}
+      summary: Detail Lesson
+      tags:
+      - Lessons
+  /lesson/attempt/{userId}/{lessonId}:
+    put:
+      parameters:
+      - description: lessonId
+        in: path
+        name: lessonId
+        required: true
+        type: integer
+      - description: userId
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Lesson Attempt
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.LessonAttempt'
+      responses: {}
+      summary: Attempt Lesson
+      tags:
+      - Lessons
   /lesson/save/{userId}/{lessonId}:
     put:
       parameters:
@@ -117,14 +182,15 @@ paths:
       summary: Save Lesson
       tags:
       - Lessons
-  /lessons/{userId}:
-    get:
+  /lessons:
+    post:
       parameters:
-      - description: userId
-        in: path
-        name: userId
+      - description: LessonBrowse
+        in: body
+        name: lesson
         required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/models.LessonBrowse'
       responses:
         "200":
           description: OK
@@ -133,14 +199,15 @@ paths:
       summary: Browse Lesson
       tags:
       - Lessons
-  /user/{id}:
-    get:
+  /user:
+    post:
       parameters:
-      - description: userId
-        in: path
-        name: id
+      - description: User Detail
+        in: body
+        name: user
         required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/models.UserDetail'
       responses:
         "200":
           description: OK
@@ -149,6 +216,7 @@ paths:
       summary: Detail User
       tags:
       - Users
+  /user/{id}:
     put:
       consumes:
       - application/json

@@ -21,10 +21,11 @@ import (
 
 func main() {
 	route := gin.Default()
+	// export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
 	// Middleware CORS
 	route.Use(cors.New(cors.Config{
-		AllowAllOrigins:  true, // Ubah sesuai kebutuhan
+		AllowOrigins:     []string{"http://localhost:4200", "https://a08f-114-122-7-105.ngrok-free.app/"}, // Ubah sesuai kebutuhan
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -40,7 +41,7 @@ func main() {
 	api := route.Group("/gesture-guru")
 	{
 		// User API
-		api.GET("/user/:id", userController.Detail)
+		api.POST("/user", userController.Detail)
 		api.POST("/user/register", userController.Register)
 		api.PUT("/user/verify/:id", userController.Verify)
 		api.PUT("/user/request-otp/:id", userController.RequestOTP)
@@ -49,8 +50,10 @@ func main() {
 		api.PUT("/user/email/:id", userController.UpdateEmail)
 
 		// Lesson API
-		api.GET("/lessons/:userId", lessonController.Browse)
+		api.POST("/lessons", lessonController.Browse)
+		api.POST("/lesson", lessonController.Detail)
 		api.PUT("/lesson/save/:userId/:lessonId", lessonController.SaveLesson)
+		api.PUT("/lesson/attempt/:userId/:lessonId", lessonController.AttemptLesson)
 	}
 
 	route.Run()

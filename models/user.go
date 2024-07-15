@@ -7,6 +7,7 @@ type User struct {
 	Password string  `json:"password"`
 	Profile  *string `json:"profile"`
 	Bio      *string `json:"bio"`
+	Verified bool    `json:"verified"`
 }
 
 type UserRegister struct {
@@ -33,4 +34,8 @@ type UserUpdate struct {
 
 type UserUpdateEmail struct {
 	Email string `json:"email" validate:"required,email,max=50"`
+}
+
+type UserDetail struct {
+	UserId int `json:"userId" validate:"required"`
 }

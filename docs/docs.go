@@ -15,6 +15,60 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/lesson": {
+            "post": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Detail Lesson",
+                "parameters": [
+                    {
+                        "description": "LessonBrowse",
+                        "name": "lesson",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LessonBrowse"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/lesson/attempt/{userId}/{lessonId}": {
+            "put": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Attempt Lesson",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "lessonId",
+                        "name": "lessonId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "userId",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Lesson Attempt",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LessonAttempt"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/lesson/save/{userId}/{lessonId}": {
             "put": {
                 "tags": [
@@ -40,19 +94,21 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/lessons/{userId}": {
-            "get": {
+        "/lessons": {
+            "post": {
                 "tags": [
                     "Lessons"
                 ],
                 "summary": "Browse Lesson",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "userId",
-                        "name": "userId",
-                        "in": "path",
-                        "required": true
+                        "description": "LessonBrowse",
+                        "name": "lesson",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LessonBrowse"
+                        }
                     }
                 ],
                 "responses": {
@@ -60,6 +116,33 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.Lesson"
+                        }
+                    }
+                }
+            }
+        },
+        "/user": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Detail User",
+                "parameters": [
+                    {
+                        "description": "User Detail",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserDetail"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
                         }
                     }
                 }
@@ -224,29 +307,6 @@ const docTemplate = `{
             }
         },
         "/user/{id}": {
-            "get": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Detail User",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "userId",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    }
-                }
-            },
             "put": {
                 "description": "Sample Payload: \u003cbr\u003e ` + "`" + `{` + "`" + `\u003cbr\u003e` + "`" + ` \"profile\": \"profile.jpg\", ` + "`" + `\u003cbr\u003e` + "`" + ` \"username\": \"serafinasalim\", ` + "`" + `\u003cbr\u003e` + "`" + ` \"bio\": \"bio aq\" ` + "`" + `\u003cbr\u003e` + "`" + ` }` + "`" + `",
                 "consumes": [
@@ -311,6 +371,36 @@ const docTemplate = `{
                 }
             }
         },
+        "models.LessonAttempt": {
+            "type": "object",
+            "required": [
+                "score"
+            ],
+            "properties": {
+                "attemptNumber": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "number",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "models.LessonBrowse": {
+            "type": "object",
+            "required": [
+                "userId"
+            ],
+            "properties": {
+                "lessonId": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.User": {
             "type": "object",
             "properties": {
@@ -331,6 +421,20 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                },
+                "verified": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.UserDetail": {
+            "type": "object",
+            "required": [
+                "userId"
+            ],
+            "properties": {
+                "userId": {
+                    "type": "integer"
                 }
             }
         },

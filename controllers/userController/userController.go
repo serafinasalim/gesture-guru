@@ -62,15 +62,30 @@ func SendMailOTP(body string, to []string) {
 
 // @Summary Detail User
 // @Tags Users
-// @Param id path int true "userId"
+// @Param user body models.UserDetail true "User Detail"
 // @Success 200 {object} models.User
-// @Router /user/{id} [get]
+// @Router /user [post]
 func Detail(c *gin.Context) {
-	id := c.Param("id")
+	var params models.UserDetail
+
+	if err := c.ShouldBindJSON(&params); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
+
+	// Validate the user struct
+	if err := validate.Struct(&params); err != nil {
+		var validationErrors []string
+		for _, err := range err.(validator.ValidationErrors) {
+			validationErrors = append(validationErrors, err.Error())
+		}
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"status": "error", "message": validationErrors})
+		return
+	}
 
 	var user models.User
 	query := "SELECT id, username, email, profile, bio FROM users WHERE id = ?"
-	err := models.DB.QueryRow(query, id).Scan(
+	err := models.DB.QueryRow(query, params.UserId).Scan(
 		&user.Id,
 		&user.Username,
 		&user.Email,
@@ -251,13 +266,13 @@ func Verify(c *gin.Context) {
 		// Setelah verify bisa punya personal status on lessons
 		var lessonData models.Lesson
 		const queryLesson = `SELECT 
-						A.id,
-						A.code, 
-						A.title, 
-						A.type, 
-						A.video,
-						A.duration 
-					FROM lessons A`
+								A.Id
+								A.code, 
+								A.title, 
+								A.type, 
+								A.video,
+								A.duration 
+							FROM lessons A`
 		rows, err := models.DB.Query(queryLesson)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
@@ -326,10 +341,18 @@ func Login(c *gin.Context) {
 	}
 
 	// Check if the email already exists
+	var userModel models.User
 	var storedPassword string
-	var verified bool
-	query := "SELECT password, verified FROM users WHERE username = ?"
-	if err := models.DB.QueryRow(query, user.Username).Scan(&storedPassword, &verified); err != nil {
+	query := "SELECT id, username, email, password, profile, bio, verified FROM users WHERE username = ?"
+	if err := models.DB.QueryRow(query, user.Username).Scan(
+		&userModel.Id,
+		&userModel.Username,
+		&userModel.Email,
+		&storedPassword,
+		&userModel.Profile,
+		&userModel.Bio,
+		&userModel.Verified,
+	); err != nil {
 		if err == sql.ErrNoRows {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "error", "message": "Invalid username or password"})
 		} else {
@@ -344,12 +367,12 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if !verified {
+	if !userModel.Verified {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "User is not verified"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Login successful"})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Login successful", "user": userModel})
 }
 
 // @Summary Update User Email
@@ -522,7 +545,7 @@ func RequestOTP(c *gin.Context) {
 
 	SendMailOTP(msg, emails)
 
-	queryUpdateOTP := "UDPATE users SET otp = ? WHERE id = ?"
+	queryUpdateOTP := "UPDATE users SET otp = ? WHERE id = ?"
 	_, err = models.DB.Exec(queryUpdateOTP, otp, userId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
